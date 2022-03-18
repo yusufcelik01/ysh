@@ -87,6 +87,38 @@ int main(int argc, char** argv) {
                 number_of_paths++;
             }
             //TODO free old paths
+            i = 0;
+            while(paths[i] != NULL) {
+                free(paths[i]); 
+                i++;
+            }
+            free(paths);
+            paths = calloc(sizeof(char*), number_of_paths + 1);
+            int j = 0;
+            i = 1;
+            while(tokens[i] != NULL) {
+                
+                int path_size = 0;
+                char prev = '\0';
+                while(tokens[i][path_size] != '\0') {
+                    prev = tokens[i][path_size];
+                    path_size++;
+                }
+                if(prev != '/') {
+                    char* tmp_path = malloc(sizeof(char)*(path_size + 2));
+                    tmp_path[0] = '\0';
+                    str_concat(tmp_path, tokens[i]);
+                    str_concat(tmp_path, "/");
+                    paths[j] = tmp_path;
+                }
+                else {
+                    paths[j] = str_copy(tokens[i]);
+                }
+
+                j++;
+                i++;
+            }
+            paths[j] = NULL;
                          
 
         }
@@ -104,6 +136,8 @@ int main(int argc, char** argv) {
                     pid_t cpid = exec_prog(exe_path, tokens);
                     int wstatus; 
                     waitpid(cpid, &wstatus, 0);
+                    free(exe_path);
+                    break;
                 }
 
                 free(exe_path);

@@ -26,6 +26,10 @@ char* str_copy(const char* src) {
     char* dst; 
     size_t n = 2 << 3;
     int i = 0;
+
+    if(src == NULL) {
+        return NULL;
+    }
     
     dst = calloc(sizeof(char), n);
     while( (dst[i] = src[i]) != '\0') {
