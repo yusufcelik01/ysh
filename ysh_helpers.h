@@ -20,5 +20,6 @@ char** get_tokens(char* str, const char* delims);
 char* str_copy(const char* src);
 char* str_concat(char* dst, char* src);
 pid_t exec_prog(char* path, char** tokens);
+pid_t exec_progp(char** paths, char** tokens);
 
 #endif

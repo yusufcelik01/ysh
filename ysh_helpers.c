@@ -1,5 +1,6 @@
 #include "ysh_helpers.h"
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -79,4 +80,49 @@ pid_t exec_prog(char* path, char** tokens) {
 
 
     return 0;
+}
+
+pid_t exec_progp(char** paths, char** tokens) {
+    if((tokens[0][0] == '.' && tokens[0][1] == '/') 
+            || tokens[0][0] == '/') {
+
+        if(!access(tokens[0], X_OK)){
+            pid_t cpid = exec_prog(tokens[0], tokens);
+            return cpid;
+        }    
+        else if(!access(tokens[0], F_OK)) {
+            fprintf(stderr, "ysh: %s: Permission denied", tokens[0]);
+            return -1;
+        }
+        else {
+            fprintf(stderr, "ysh: %s: No such file or directory", tokens[0]);
+            return -1;
+        }
+    }
+
+    int i;
+    int found_bin = 0;
+    for(i=0; paths[i] != NULL; i++){
+        int exe_len = strlen(paths[i]) + strlen(tokens[0]);
+        char* exe_path = malloc(sizeof(char) * (exe_len + 2));
+        strcpy(exe_path, paths[i]);
+        str_concat(exe_path, tokens[0]);
+        //printf("path: %s\n", exe_path);
+
+        //TODO input output redirection and PIPE
+
+        if(!access(exe_path, X_OK)){
+            pid_t cpid = exec_prog(exe_path, tokens);
+            free(exe_path);
+            return cpid;
+        }
+
+
+        free(exe_path);
+    }
+    if(!found_bin) {
+        fprintf(stderr, "ysh: %s : command not found\n", tokens[0]);
+    }
+
+    return -1;
 }

@@ -86,7 +86,6 @@ int main(int argc, char** argv) {
                 i++;
                 number_of_paths++;
             }
-            //TODO free old paths
             i = 0;
             while(paths[i] != NULL) {
                 free(paths[i]); 
@@ -124,24 +123,10 @@ int main(int argc, char** argv) {
         }
         else {//assume only one commnad is given
             //exec_prog(paths, tokens, WAIT_TRUE);
-            int i;
-            for(i=0; paths[i] != NULL; i++){
-                int exe_len = strlen(paths[i]) + strlen(tokens[0]);
-                char* exe_path = malloc(sizeof(char) * (exe_len + 2));
-                strcpy(exe_path, paths[i]);
-                str_concat(exe_path, tokens[0]);
-                //printf("path: %s\n", exe_path);
+            pid_t cpid = exec_progp(paths, tokens);
+            int wstatus; 
+            waitpid(cpid, &wstatus, 0);
 
-                if(!access(exe_path, X_OK)){
-                    pid_t cpid = exec_prog(exe_path, tokens);
-                    int wstatus; 
-                    waitpid(cpid, &wstatus, 0);
-                    free(exe_path);
-                    break;
-                }
-
-                free(exe_path);
-            }
         }
 
         free(line_begin);
