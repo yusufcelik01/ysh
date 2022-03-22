@@ -123,6 +123,9 @@ int main(int argc, char** argv) {
         }
         else {//assume only one commnad is given
             //exec_prog(paths, tokens, WAIT_TRUE);
+            //TODO change tokens according to given < > | & && arguments and execute multiple programs at once
+            //TODO first split tokens into token groups by | & and && and execute each token group as a separate program
+            //TODO then process < > 
             pid_t cpid = exec_progp(paths, tokens);
             int wstatus; 
             waitpid(cpid, &wstatus, 0);
