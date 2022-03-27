@@ -151,7 +151,18 @@ int main(int argc, char** argv) {
             //TODO then process < > 
             pid_t cpid = exec_progp(paths, tokens);
             int wstatus; 
+
+            sa_sigint.sa_handler = SIG_IGN;
+            if(sigaction(SIGINT, &sa_sigint, NULL) == -1){
+                write(STDERR_FILENO, "signal error\n", 13);
+                exit(1);
+            }
             waitpid(cpid, &wstatus, 0);
+            sa_sigint.sa_handler = sig_int_handler;
+            if(sigaction(SIGINT, &sa_sigint, NULL) == -1){
+                write(STDERR_FILENO, "signal error\n", 13);
+                exit(1);
+            }
 
         }
 
