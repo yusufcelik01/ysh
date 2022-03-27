@@ -2,10 +2,21 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "ysh_helpers.h"
 #include <sys/wait.h>
+#include <signal.h>
+#include <sys/types.h>
+
+#include "ysh_helpers.h"
 
 char white_spaces[] = {' ', '\t', '\n', '\0'};
+char* cwd = NULL;
+
+void sig_int_handler(int sig) {
+    write(STDOUT_FILENO, "\nysh:", 5);
+    int buff_len = strlen(cwd);
+    write(STDOUT_FILENO, cwd, buff_len);
+    write(STDOUT_FILENO, "$ ", 2);
+}
 
 int main(int argc, char** argv) {
     if(argc == 2) {//batch mode
@@ -19,6 +30,15 @@ int main(int argc, char** argv) {
         exit(1);
     }
     //else prompt mode
+
+    struct sigaction sa_sigint;
+    sa_sigint.sa_flags = SA_RESTART;
+    sa_sigint.sa_handler = sig_int_handler; 
+    sigemptyset(&sa_sigint.sa_mask);
+    if(sigaction(SIGINT, &sa_sigint, NULL) == -1){
+        write(STDERR_FILENO, "Initialization error\n", 21);
+        exit(1);
+    }
 
 
     char** paths = NULL;
@@ -34,7 +54,7 @@ int main(int argc, char** argv) {
 
 
     size_t dir_name_size = 1024;
-    char* cwd = calloc(sizeof(char), dir_name_size);
+    cwd = calloc(sizeof(char), dir_name_size);
     if(getcwd(cwd, dir_name_size) == NULL) {
         fprintf(stderr, "Error on reading directory name exiting shell\n");
         exit(1);
@@ -47,6 +67,8 @@ int main(int argc, char** argv) {
             
             exit(0);
         } 
+        //TODO remove this line 
+        //printf("Read line:\n%s", line);
         line_begin = line;
 
         char** tokens = get_tokens(line, white_spaces);
@@ -61,6 +83,7 @@ int main(int argc, char** argv) {
         //TODO exec command
         //built in commands 
         if(token_count < 1){
+            free(tokens);
             continue;
         }
         if(strcmp(tokens[0], "exit") == 0) {
